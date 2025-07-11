@@ -60,4 +60,24 @@ public class VoteController(IGrainFactory grainFactory)
 
         return Ok(new { message = "Vote cast successfully", user = user, placeName = request.PlaceName });
     }
+
+    [HttpGet("results")]
+    public async Task<IActionResult> GetResults(
+        [FromQuery]
+        string user, 
+        [FromQuery] 
+        DateTime date)
+    {
+        if (string.IsNullOrEmpty(user))
+        {
+            return BadRequest("User parameter is required");
+        }
+
+        var dateKey = date.ToString("yyyy-MM-dd");
+        var grain = _grainFactory.GetGrain<ILunchVoteGrain>(dateKey);
+
+        var results = await grain.GetResultsAsync();
+
+        return Ok(results);
+    }
 }

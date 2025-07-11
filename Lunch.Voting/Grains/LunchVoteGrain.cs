@@ -47,4 +47,36 @@ public class LunchVoteGrain : Grain, ILunchVoteGrain
 
         return Task.FromResult(true);
     }
+
+    public Task<List<VoteResult>> GetResultsAsync()
+    {
+        if (!_state.CanShowResults)
+        {
+            return Task.FromResult(new List<VoteResult>());
+        }
+        List<VoteResult> results = _state.Votes
+            .GroupBy(x => x.PlaceName)
+            .Select(x => new VoteResult
+            {
+                PlaceName = x.Key,
+                Count = x.Count()
+            })
+            .ToList();
+
+        foreach (var place in _state.LunchPlaces)
+        {
+            if (!results.Any(x => x.PlaceName == place))
+            {
+                var voteResult = new VoteResult
+                {
+                    PlaceName = place,
+                    Count = 0,
+                };
+
+                results.Add(voteResult);
+            }
+        }
+
+        return Task.FromResult(results);
+    }
 }

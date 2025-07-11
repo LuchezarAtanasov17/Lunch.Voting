@@ -1,4 +1,6 @@
-﻿namespace Lunch.Voting.Interfaces;
+﻿using Lunch.Voting.Models;
+
+namespace Lunch.Voting.Interfaces;
 
 public interface ILunchVoteGrain : IGrainWithStringKey
 {
@@ -6,4 +8,5 @@ public interface ILunchVoteGrain : IGrainWithStringKey
 
     public Task<bool> CastVoteAsync(string userName, string placeName);
 
+    public Task<List<VoteResult>> GetResultsAsync();
 }
