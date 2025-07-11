@@ -12,7 +12,11 @@ public class VoteController(IGrainFactory grainFactory)
     private readonly IGrainFactory _grainFactory = grainFactory;
 
     [HttpPost("create")]
-    public async Task<IActionResult> CreateVote([FromQuery] string user, [FromBody] CreateVoteRequest request)
+    public async Task<IActionResult> CreateVote(
+        [FromQuery] 
+        string user, 
+        [FromBody] 
+        CreateVoteRequest request)
     {
         if (string.IsNullOrEmpty(user))
         {
@@ -30,5 +34,30 @@ public class VoteController(IGrainFactory grainFactory)
         }
 
         return Ok(new { message = "Vote created successfully", voteDate = request.VoteDate });
+    }
+
+    [HttpPost("cast")]
+    public async Task<IActionResult> CastVote(
+        [FromQuery]
+        string user, 
+        [FromBody] 
+        CastVoteRequest request)
+    {
+        if (string.IsNullOrEmpty(user))
+        {
+            return BadRequest("User parameter is required");
+        }
+
+        var dateKey = request.VoteDate.ToString("yyyy-MM-dd");
+        var grain = _grainFactory.GetGrain<ILunchVoteGrain>(dateKey);
+
+        var voted = await grain.CastVoteAsync(user, request.PlaceName);
+
+        if (!voted)
+        {
+            return BadRequest("Unable to cast vote. Voting may be closed or you may have already voted.");
+        }
+
+        return Ok(new { message = "Vote cast successfully", user = user, placeName = request.PlaceName });
     }
 }
