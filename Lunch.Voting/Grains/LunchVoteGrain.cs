@@ -77,6 +77,10 @@ public class LunchVoteGrain : Grain, ILunchVoteGrain
             }
         }
 
-        return Task.FromResult(results);
+        List<VoteResult> sortedResults = results
+            .OrderByDescending(x => x.Count)
+            .ToList();
+
+        return Task.FromResult(sortedResults);
     }
 }
