@@ -2,9 +2,11 @@
 
 public class LunchVoteState
 {
+    private static readonly TimeSpan RESULTS_END_TIME = TimeSpan.FromHours(13.5);
+
     public DateTime VoteDate { get; set; }
 
-    public DateTime VoteEndTime { get; set; }
+    public TimeSpan VoteEndTime { get; set; } = TimeSpan.FromHours(11.5);
 
     public List<Vote> Votes { get; set; } = new();
 
@@ -17,7 +19,7 @@ public class LunchVoteState
         "Salad Spot",
     };
 
-    public bool IsVotingClosed => DateTime.UtcNow > VoteEndTime;
+    public bool IsVotingClosed => DateTime.Now.TimeOfDay > VoteEndTime;
 
-    public bool CanShowResults => IsVotingClosed && DateTime.UtcNow <= VoteEndTime.AddMinutes(15);
+    public bool CanShowResults => IsVotingClosed && DateTime.Now.TimeOfDay <= RESULTS_END_TIME;
 }

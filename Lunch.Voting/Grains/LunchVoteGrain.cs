@@ -13,9 +13,12 @@ public class LunchVoteGrain : Grain, ILunchVoteGrain
         {
             return Task.FromResult(false);
         }
+        if (_state.VoteEndTime < voteDate.Date.TimeOfDay)
+        {
+            return Task.FromResult(false);
+        }
 
         _state.VoteDate = voteDate.Date;
-        _state.VoteEndTime = voteDate.AddMinutes(5);
 
         return Task.FromResult(true);
     }
