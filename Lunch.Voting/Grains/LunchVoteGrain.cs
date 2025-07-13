@@ -10,8 +10,12 @@ public class LunchVoteGrain(TimeProvider timeProvider)
     private readonly TimeProvider _timeProvider = timeProvider;
     private LunchVoteState _state = new LunchVoteState(timeProvider);
 
-    public Task<bool> CreateVoteAsync(DateTime voteDate)
+    public Task<bool> CreateVoteAsync(string userName, DateTime voteDate)
     {
+        if (userName == "clock")
+        {
+            return Task.FromResult(false);
+        }
         if (_state.VoteDate.Date == voteDate.Date)
         {
             return Task.FromResult(false);

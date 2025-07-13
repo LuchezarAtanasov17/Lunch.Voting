@@ -26,7 +26,7 @@ public class VoteController(IGrainFactory grainFactory)
         string dateKey = request.VoteDate.ToString("yyyy-MM-dd");
         var grain = _grainFactory.GetGrain<ILunchVoteGrain>(dateKey);
 
-        var created = await grain.CreateVoteAsync(request.VoteDate);
+        var created = await grain.CreateVoteAsync(user, request.VoteDate);
 
         if (!created)
         {
