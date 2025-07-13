@@ -1,8 +1,9 @@
 ﻿namespace Lunch.Voting.Models;
 
-public class LunchVoteState
+public class LunchVoteState(TimeProvider timeProvider)
 {
     private static readonly TimeSpan RESULTS_END_TIME = TimeSpan.FromHours(13.5);
+    private TimeProvider _timeProvider = timeProvider;
 
     public DateTime VoteDate { get; set; }
 
@@ -19,7 +20,7 @@ public class LunchVoteState
         "Salad Spot",
     };
 
-    public bool IsVotingClosed => DateTime.Now.TimeOfDay > VoteEndTime;
+    public bool IsVotingClosed => _timeProvider.GetUtcNow().ToLocalTime().TimeOfDay > VoteEndTime;
 
-    public bool CanShowResults => IsVotingClosed && DateTime.Now.TimeOfDay <= RESULTS_END_TIME;
+    public bool CanShowResults => IsVotingClosed && _timeProvider.GetUtcNow().ToLocalTime().TimeOfDay <= RESULTS_END_TIME;
 }

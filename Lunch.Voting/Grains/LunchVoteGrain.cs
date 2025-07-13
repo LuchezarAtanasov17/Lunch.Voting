@@ -1,11 +1,14 @@
-﻿using Lunch.Voting.Interfaces;
+﻿using Lunch.Voting.Helpers;
+using Lunch.Voting.Interfaces;
 using Lunch.Voting.Models;
 
 namespace Lunch.Voting.Grains;
 
-public class LunchVoteGrain : Grain, ILunchVoteGrain
+public class LunchVoteGrain(TimeProvider timeProvider)
+    : Grain, ILunchVoteGrain
 {
-    private LunchVoteState _state = new();
+    private readonly TimeProvider _timeProvider = timeProvider;
+    private LunchVoteState _state = new LunchVoteState(timeProvider);
 
     public Task<bool> CreateVoteAsync(DateTime voteDate)
     {
@@ -43,7 +46,7 @@ public class LunchVoteGrain : Grain, ILunchVoteGrain
             Date = _state.VoteDate,
             PlaceName = placeName,
             UserName = userName,
-            VotedAt = DateTime.UtcNow,
+            VotedAt = _timeProvider.GetUtcNow().ToLocalTime().Date,
         };
 
         _state.Votes.Add(vote);
@@ -57,6 +60,7 @@ public class LunchVoteGrain : Grain, ILunchVoteGrain
         {
             return Task.FromResult(new List<VoteResult>());
         }
+
         List<VoteResult> results = _state.Votes
             .GroupBy(x => x.PlaceName)
             .Select(x => new VoteResult
@@ -85,5 +89,22 @@ public class LunchVoteGrain : Grain, ILunchVoteGrain
             .ToList();
 
         return Task.FromResult(sortedResults);
+    }
+
+    public Task<bool> SetServerTimeAsync(string userName, DateTimeOffset newTime)
+    {
+        if (userName != "clock")
+        {
+            return Task.FromResult(false);
+        }
+
+        if (_timeProvider is VotingTimeProvider votingTimeProvider)
+        {
+            votingTimeProvider.SetTime(newTime);
+
+            return Task.FromResult(true);
+        }
+
+        return Task.FromResult(false);
     }
 }

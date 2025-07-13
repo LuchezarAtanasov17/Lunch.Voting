@@ -80,4 +80,26 @@ public class VoteController(IGrainFactory grainFactory)
 
         return Ok(results);
     }
+
+    [HttpPost("set-time")]
+    public async Task<IActionResult> SetTime(
+        [FromQuery]
+        string username, 
+        [FromBody] 
+        SetTimeRequest request)
+    {
+        if (username != "clock")
+        {
+            return Forbid("Only 'clock' user can set the time.");
+        }
+
+        var dateKey = request.VoteDate.ToString("yyyy-MM-dd");
+        var grain = _grainFactory.GetGrain<ILunchVoteGrain>(dateKey);
+
+        var success = await grain.SetServerTimeAsync(username, request.NewTime);
+
+        return success 
+            ? Ok("Time updated") 
+            : StatusCode(500, "Failed to update time");
+    }
 }

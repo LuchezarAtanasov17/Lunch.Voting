@@ -1,3 +1,4 @@
+using Lunch.Voting.Helpers;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.Identity.Web;
 
@@ -10,6 +11,10 @@ builder.Host.UseOrleans(siloBuilder =>
         .ConfigureLogging(logging => logging.AddConsole())
         .AddMemoryGrainStorage("Default");
 });
+
+var mockTimeProvider = new VotingTimeProvider(DateTimeOffset.Now);
+
+builder.Services.AddSingleton<TimeProvider>(mockTimeProvider);
 
 builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
     .AddMicrosoftIdentityWebApi(builder.Configuration.GetSection("AzureAd"));
